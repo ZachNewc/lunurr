@@ -1,0 +1,28 @@
+.container {
+    max-width: 1200px;
+    margin: var(--space-xl) auto;
+    padding: var(--space-xl);
+    text-align: center;
+}
+  
+.cta {
+    background: var(--gradient-primary);
+    border: none;
+    padding: var(--space-md) var(--space-xl);
+    border-radius: var(--border-radius-md);
+    color: var(--color-accent);
+    font-weight: 600;
+    cursor: pointer;
+    transition: box-shadow 0.3s ease;
+}
+
+.cta:hover {
+    box-shadow: var(--shadow-hover);
+}
+
+.featureText {
+    color: var(--color-text-muted);
+    line-height: 1.6;
+    max-width: 800px;
+    margin: var(--space-lg) auto;
+}

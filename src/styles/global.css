@@ -1,0 +1,48 @@
+:root {
+    /* Color Palette */
+    --color-bg: #0a0e17;
+    --color-surface: #161d28;
+    --color-border: #2a3547;
+    --color-primary: #d0d3db;
+    --color-secondary: #6d5ffd;
+    --color-tertiary: #3a8dff;
+    --color-text: #e0e0e0;
+    --color-text-muted: #8a9aad;
+    --color-accent: #f0f4ff;
+    --color-error: #e34d42;
+
+    /* Gradients */
+    --gradient-primary: linear-gradient(45deg, var(--color-primary), var(--color-secondary));
+
+    /* Spacing */
+    --space-xs: 0.5rem;
+    --space-sm: 0.75rem;
+    --space-md: 1rem;
+    --space-lg: 1.5rem;
+    --space-xl: 2rem;
+
+    /* Effects */
+    --shadow-node: 0 4px 20px rgba(0, 0, 0, 0.3);
+    --shadow-hover: 0 4px 30px rgba(94, 129, 172, 0.15);
+    --darken-bg: rgba(0, 0, 0, 0.5);
+
+    /* Borders */
+    --border-radius-sm: 6px;
+    --border-radius-md: 8px;
+
+    /* React Flow */
+    --handle-width: 15px;
+    --handle-height: 15px;
+}
+
+* {
+    box-sizing: border-box;
+    font-family: 'Inter', system-ui, sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background: var(--color-bg);
+    color: var(--color-text);
+}
