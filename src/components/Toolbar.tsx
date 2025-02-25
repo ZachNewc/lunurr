@@ -1,13 +1,18 @@
-import React, { useState } from 'react';
+import React, { useState, Dispatch, SetStateAction } from 'react';
+import { useReactFlow, Node, Edge } from 'reactflow';
 import styles from "../styles/Toolbar.module.css";
 
-interface ToolbarProps {
-  addNode: (type: string) => void;
+interface toolbarProps { 
+  addNode: (type: string, screenToFlowPosition: (pos: {x: number, y: number}) => {x: number, y: number}) => void,
+  nodes: Node[];
+  setNodes: Dispatch<SetStateAction<Node[]>>;
+  edges: Edge[];
+  setEdges: Dispatch<SetStateAction<Edge[]>>;
 }
 
-const Toolbar: React.FC<ToolbarProps> = ({ addNode }) => {
+const Toolbar: React.FC<toolbarProps> = ({ addNode, nodes, setNodes, edges, setEdges }) => {
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
-
+  const { screenToFlowPosition } = useReactFlow();
   return (
     <div className={styles.toolbarContainer}>
       {/* File Menu */}
@@ -19,9 +24,9 @@ const Toolbar: React.FC<ToolbarProps> = ({ addNode }) => {
         <button className={styles.toolbarButton}>File</button>
         {activeMenu === 'file' && (
           <div className={styles.dropdownMenu}>
-            <button className={styles.menuItem}>New</button>
+            <button className={styles.menuItem} onClick={() => {setEdges([]); setNodes([]);}}>New</button>
             <button className={styles.menuItem}>Open</button>
-            <button className={styles.menuItem}>Save</button>
+            <button className={styles.menuItem} onClick={() => {save(nodes,edges)}}>Save</button>
           </div>
         )}
       </div>
@@ -51,23 +56,35 @@ const Toolbar: React.FC<ToolbarProps> = ({ addNode }) => {
         <button className={styles.toolbarButton}>Add</button>
         {activeMenu === 'add' && (
           <div className={styles.dropdownMenu}>
-            <button 
-              className={styles.menuItem} 
-              onClick={() => addNode('event')}
+            <button
+              className={styles.menuItem}
+              onClick={() => addNode('event', screenToFlowPosition)}
             >
               Event
             </button>
             <button 
               className={styles.menuItem} 
-              onClick={() => addNode('if')}
+              onClick={() => addNode('if', screenToFlowPosition)}
             >
               If
             </button>
             <button 
               className={styles.menuItem} 
-              onClick={() => addNode('label')}
+              onClick={() => addNode('label', screenToFlowPosition)}
             >
               Label
+            </button>
+            <button 
+              className={styles.menuItem} 
+              onClick={() => addNode('buy', screenToFlowPosition)}
+            >
+              Buy
+            </button>
+            <button 
+              className={styles.menuItem} 
+              onClick={() => addNode('sell', screenToFlowPosition)}
+            >
+              Sell
             </button>
           </div>
         )}
@@ -75,5 +92,14 @@ const Toolbar: React.FC<ToolbarProps> = ({ addNode }) => {
     </div>
   );
 };
+
+function save(nodes: Node[], edges: Edge[]) {
+  const storage = {
+    nodes: nodes,
+    edges: edges
+  };
+
+  window.localStorage.setItem('board', JSON.stringify(storage));
+}
 
 export { Toolbar };

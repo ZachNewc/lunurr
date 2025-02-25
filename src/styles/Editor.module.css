@@ -86,4 +86,141 @@ textarea {
     background-color: var(--darken-bg);
     color: var(--color-text);
     padding: var(--space-xs);
+    width: 150px;
+    resize: both;
+    overflow: hidden;
+}
+
+select {
+    border-radius: var(--border-radius-md);
+    background-color: var(--darken-bg);
+    color: var(--color-text);
+    padding: var(--space-xs);
+}
+
+option {
+    background-color: var(--color-bg);
+}
+
+.nodeTitle {
+    font-weight:600;
+}
+
+.horizontalAlign {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    flex-direction: row;
+}
+
+.variableInput {
+    border-radius: var(--border-radius-md);
+    background-color: var(--darken-bg);
+    color: var(--color-text);
+    padding: var(--space-xs);
+    width: 150px;
+    resize: both;
+    overflow: hidden;
+    resize: none;
+    min-height: fit-content;
+    max-height: fit-content;
+    min-width: 50px;
+    width: auto;
+}
+
+.variableInput, select, .nodeTitle {
+    margin: var(--space-xs);
+}
+
+.nodeText {
+    margin: var(--space-xxs);
+}
+
+button {
+    border-radius: var(--border-radius-md);
+    background-color: var(--brighten-bg-slight);
+    color: var(--color-text);
+    padding: var(--space-xxs);
+    border: none;
+    transition: 0.2s;
+}
+
+button:hover {
+    background-color: var(--darken-bg);
+}
+
+button:active {
+    background-color: var(--brighten-bg-slight);
+}
+
+.suggestions {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-md);
+    box-shadow: var(--shadow-node);
+    margin-top: var(--space-xxs);
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 1000;
+    position: absolute;
+}
+  
+.suggestionItem {
+    color: var(--color-text);
+    padding: var(--space-xs) var(--space-xs);
+    font-size: 0.9em;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    border-bottom: 1px solid var(--color-border);
+}
+  
+.suggestionItem:hover {
+    background: var(--darken-bg-slight);
+    color: var(--color-accent);
+}
+  
+.suggestionItem:active {
+    background: var(--brighten-bg-slight);
+}
+  
+  /* Selected suggestion highlight */
+.suggestionItem[data-selected="true"] {
+    background: var(--color-tertiary);
+    color: var(--color-bg);
+}
+  
+  /* Scrollbar styling */
+.suggestions::-webkit-scrollbar {
+    width: 6px;
+    background: var(--color-surface);
+}
+  
+.suggestions::-webkit-scrollbar-thumb {
+    background: var(--color-border);
+    border-radius: var(--border-radius-md);
+}
+  
+  /* Matching text highlight */
+.suggestionItem span.match {
+    color: var(--color-secondary);
+    font-weight: 600;
+}
+  
+/* Add subtle animation */
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-2px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.suggestions {
+    animation: slideIn 0.15s ease-out;
 }

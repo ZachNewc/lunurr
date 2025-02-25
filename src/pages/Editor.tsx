@@ -5,61 +5,115 @@ import ReactFlow, {
   Panel,
   applyNodeChanges,
   applyEdgeChanges,
+  DefaultEdgeOptions,
   addEdge,
   Connection,
   Edge,
   Node,
+  NodeTypes,
   NodeChange,
   EdgeChange,
   MiniMap,
   SelectionMode,
 } from 'reactflow';
+import type { MarkerType } from 'reactflow';
 import 'reactflow/dist/style.css';
-import { LabelNode } from '../components/Nodes';
+import { 
+  LabelNode,
+  EventNode, 
+  IfNode, 
+  BuyNode,
+  SellNode,
+} from '../components/Nodes';
 import { Toolbar } from '../components/Toolbar';
 import styles from '../styles/Editor.module.css';
 
+const nodeTypes: NodeTypes = {
+  label: LabelNode,
+  event: EventNode,
+  if: IfNode,
+  buy: BuyNode,
+  sell: SellNode,
+};
 
-const nodeTypes =  { label: LabelNode }
+const defaultEdgeOptions: DefaultEdgeOptions = {
+  type: 'smoothstep',
+  markerEnd: {
+    type: 'arrow' as MarkerType,
+    color: '#b1b1b7',
+  },
+  style: {
+    stroke: '#b1b1b7',
+    strokeWidth: 2,
+    //strokeDasharray: "10 5"
+  },
+};
 
-const initialNodes: Node[] = [];
+const savedBoard = JSON.parse(localStorage.getItem("board") || "{}");
 
-const initialEdges: Edge[] = [];
+const initialNodes: Node[] = Array.isArray(savedBoard.nodes) ? savedBoard.nodes : [];
+const initialEdges: Edge[] = Array.isArray(savedBoard.edges) ? savedBoard.edges : [];
 
 const Editor: React.FC = () => {
   const [nodes, setNodes] = useState<Node[]>(initialNodes);
   const [edges, setEdges] = useState<Edge[]>(initialEdges);
 
-  // Connection handlers
+  const checkCircularLogic = useCallback((source: string, target: string) => {
+    if (target.length == 0 || target == source) {
+      console.warn("Attempt to connect node to itself denied.")
+      return false
+    }
+    let checks: string[] = [target]
+    while (checks.length > 0) {
+      let newChecks: string[] = []
+      checks.forEach((checkId) => {
+        let children: string[] = []
+        edges.forEach((edge: Edge) => {
+          if (edge.source == checkId) {
+            children.push(edge.target)
+          }
+        })
+        newChecks = newChecks.concat(children)
+      }) 
+      if (newChecks.includes(source)) {
+        console.warn("Attempt to connect node to its own ancestor denied.")
+        alert("You cannot connect these nodes because it will create an infinite loop.")
+        return false;
+      }
+      checks = [...newChecks]
+    }
+    return true
+  },[edges])
+
   const onConnectStart = useCallback(() => {
-    console.log('Connection started - user is dragging a connection');
+    // User started dragging node
   }, []);
 
   const onConnectEnd = useCallback(() => {
-    console.log(nodes);
+    // Mouse release on connection
   }, []);
 
   const onConnect = useCallback(
     (connection: Connection) => {
-      console.log('Connection completed between:', connection.source, 'and', connection.target);
-      setEdges((eds) => addEdge(connection, eds));
+      // Successful mouse release on connection
+      if (checkCircularLogic(connection.source || "", connection.target || "")) {
+        setEdges((eds) => addEdge(connection, eds));
+      }
     },
-    []
+    [edges]
   );
 
-  const addNode = useCallback((type: string) => {
+  const addNode = useCallback((type: string, screenToFlowPosition: (pos: {x: number, y: number}) => {x: number, y: number}) => {
+    const screenPosition = { x: window.innerWidth/2, y: window.innerHeight/2 };
+    const flowPosition = screenToFlowPosition(screenPosition);
+
     const newNode: Node = {
-      id: `node-${Date.now()}`, // Unique ID based on timestamp
-      position: {
-        x: Math.random() * 400, // Random X position for demo (adjust as needed)
-        y: Math.random() * 400, // Random Y position for demo (adjust as needed)
-      },
+      id: `node-${crypto.randomUUID()}`,
+      position: flowPosition,
       type: type,
-      data: {
-        label: 'New Node', // Default label
-      },
+      data: { label: 'New Node' },
     };
-    
+
     setNodes((nds) => [...nds, newNode]);
   }, []);
 
@@ -72,7 +126,7 @@ const Editor: React.FC = () => {
   // Keyboard handler
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Delete' || event.key === 'Backspace') {
+      if (event.key === 'Delete') {
         deleteSelected();
       }
     };
@@ -104,15 +158,36 @@ const Editor: React.FC = () => {
         onConnect={onConnect}
         nodeTypes={nodeTypes}
         fitView
-        deleteKeyCode={['Delete', 'Backspace']} // Enable built-in delete key handling
-        selectionOnDrag={true}
-        panOnDrag={[2,3]}
+        deleteKeyCode={['Delete']} // Enable built-in delete key handling
         selectionMode={SelectionMode.Partial}
+        defaultEdgeOptions={defaultEdgeOptions}
       >
+        {/* Add SVG wrapper around defs */}
+        <svg>
+          <defs>
+            <marker
+              id="react-flow__arrowclosed"
+              viewBox="0 0 10 10"
+              refX="10"
+              refY="10"
+              markerWidth="12"
+              markerHeight="12"
+              orient="auto"
+            >
+              <path d="M 0 0 L 20 5 L 0 20 z" fill="#b1b1b7" />
+            </marker>
+          </defs>
+        </svg>
         <MiniMap pannable zoomable />
         <Background gap={20} size={2} />
         <Controls />
-        <Panel position="top-left"><Toolbar addNode={addNode}/></Panel>
+        <Panel position="top-left"><Toolbar 
+          addNode={addNode}
+          nodes={nodes}
+          setNodes={setNodes}
+          edges={edges}
+          setEdges={setEdges}
+        /></Panel>
       </ReactFlow>
     </div>
   );

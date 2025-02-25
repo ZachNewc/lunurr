@@ -15,6 +15,7 @@
     --gradient-primary: linear-gradient(45deg, var(--color-primary), var(--color-secondary));
 
     /* Spacing */
+    --space-xxs: 0.25rem;
     --space-xs: 0.5rem;
     --space-sm: 0.75rem;
     --space-md: 1rem;
@@ -25,6 +26,9 @@
     --shadow-node: 0 4px 20px rgba(0, 0, 0, 0.3);
     --shadow-hover: 0 4px 30px rgba(94, 129, 172, 0.15);
     --darken-bg: rgba(0, 0, 0, 0.5);
+    --darken-bg-slight: rgba(0, 0, 0, 0.1);
+    --brighten-bg: rgba(255, 255, 255, 0.5);
+    --brighten-bg-slight: rgba(255, 255, 255, 0.1);
 
     /* Borders */
     --border-radius-sm: 6px;
