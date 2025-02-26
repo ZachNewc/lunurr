@@ -1,5 +1,5 @@
-import { Handle, Position } from 'reactflow';
-import React, { useState, useRef, useCallback } from 'react';
+import { Handle, Position, useReactFlow } from 'reactflow';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
 
 import styles from '../styles/Editor.module.css'
 
@@ -29,31 +29,41 @@ function Comparison() {
   );
 }
 
-const AUTOCOMPLETE_OPTIONS: {[key: string]: string;} = {
-  // Portfolio Data
-  "equity()": "equity()",
-  "buyingPower()": "buyingPower()",
-  "positionOpen()": "positionOpen(default)",
-  // Standard
-  "priceOf()": "priceOf(default, 0)",
-  "analystRatingsOf()": "analystRatingsOf(default)", 
-  "daysUntilEarningsOf()": "daysUntilEarningsOf(default)", 
-  "52WeekLowOf()": "52WeekLowOf(default, 0)", 
-  "52WeekHighOf()": "52WeekHighOf(default, 0)", 
-  // Momentum Indicators
-  "rsiOf()": "rsiOf(default, 0)", 
-  // Trend Indicators
-  // Volitility Indicators
-  // Volume Indicators
-  "volumeOf()": "volumeOf(default, 0)", 
-};
+interface VariableInputProps {
+  value: string;
+  onChange: (value: string) => void;
+}
 
-function VariableInput() {
-  const [inputText, setInputText] = useState('');
+function VariableInput({ value, onChange }: VariableInputProps) {
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const divRef = useRef<HTMLDivElement>(null);
   const cursorPosRef = useRef<number>(0);
+  const AUTOCOMPLETE_OPTIONS: {[key: string]: string} = {
+    // Portfolio Data
+    "equity()": "equity()",
+    "buyingPower()": "buyingPower()",
+    "positionOpen()": "positionOpen(default)",
+    // Standard
+    "priceOf()": "priceOf(default, 0)",
+    "analystRatingsOf()": "analystRatingsOf(default)", 
+    "daysUntilEarningsOf()": "daysUntilEarningsOf(default)", 
+    "52WeekLowOf()": "52WeekLowOf(default, 0)", 
+    "52WeekHighOf()": "52WeekHighOf(default, 0)", 
+    // Momentum Indicators
+    "rsiOf()": "rsiOf(default, 0)", 
+    // Trend Indicators
+    // Volitility Indicators
+    // Volume Indicators
+    "volumeOf()": "volumeOf(default, 0)", 
+  };
+
+  // Sync div content with value prop
+  useEffect(() => {
+    if (divRef.current && divRef.current.innerText !== value) {
+      divRef.current.innerText = value;
+    }
+  }, [value]);
 
   // Track cursor position
   const updateCursorPosition = useCallback(() => {
@@ -82,13 +92,13 @@ function VariableInput() {
 
   // Handle text input
   const handleInput = useCallback((e: React.FormEvent<HTMLDivElement>) => {
-    const text = (e.currentTarget.innerText || '').replace(/\u00A0/g, ' '); // Replace nbsp with normal spaces
+    const text = (e.currentTarget.innerText || '').replace(/\u00A0/g, ' ');
+    onChange(text);
     updateCursorPosition();
     const currentWord = getCurrentWord(text);
     
-    setInputText(text);
     updateSuggestions(currentWord);
-  }, [getCurrentWord, updateCursorPosition]);
+  }, [onChange]);
 
   // Update suggestions
   const updateSuggestions = useCallback((currentWord: string) => {
@@ -105,7 +115,7 @@ function VariableInput() {
 
   // Complete the word at cursor position
   const completeWord = useCallback((completion: string) => {
-    const text = inputText;
+    const text = completion;
     const pos = cursorPosRef.current;
     let start = pos;
     let end = pos;
@@ -120,7 +130,6 @@ function VariableInput() {
 
     const newText = `${before}${completionText} ${after}`.trim();
     
-    setInputText(newText);
     setShowSuggestions(false);
 
     // Update DOM and reposition cursor
@@ -141,7 +150,8 @@ function VariableInput() {
         }
       });
     }
-  }, [inputText]);
+  onChange(newText);
+  }, [value, onChange]);
 
   // Handle keyboard events
   const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
@@ -233,16 +243,30 @@ function LabelNode() {
   );
 }
 
-function IfNode() {
+function IfNode({ id, data }: { id: string, data: any }) {
+  const { setNodes } = useReactFlow();
+
+  const handleLeftChange = (value: string) => {
+    setNodes(nds => nds.map(node => 
+      node.id === id ? { ...node, data: { ...data, left: value } } : node
+    ));
+  };
+
+  const handleRightChange = (value: string) => {
+    setNodes(nds => nds.map(node => 
+      node.id === id ? { ...node, data: { ...data, right: value } } : node
+    ));
+  };
+
   return (
     <>
       <Handle type="target" position={Position.Top} />
       <p className={styles.nodeTitle}>If </p>
       <hr />
       <div className={styles.horizontalAlign}>
-        <VariableInput />
+        <VariableInput value={data.left || ''} onChange={handleLeftChange} />
         <Comparison />
-        <VariableInput />
+        <VariableInput value={data.right || ''} onChange={handleRightChange} />
       </div>
       <Handle type="source" position={Position.Bottom} />
     </>

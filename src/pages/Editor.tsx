@@ -107,14 +107,20 @@ const Editor: React.FC = () => {
     const screenPosition = { x: window.innerWidth/2, y: window.innerHeight/2 };
     const flowPosition = screenToFlowPosition(screenPosition);
 
+    const defaultData = {
+      ...(type === 'if' && { left: '', right: '', comparison: '=' }),
+      ...(type === 'event' && { condition: '' }),
+      ...(type === 'buy' && { shares: '', stocks: ['DEFAULT'] }),
+    };
+  
     const newNode: Node = {
       id: `node-${crypto.randomUUID()}`,
       position: flowPosition,
-      type: type,
-      data: { label: 'New Node' },
+      type,
+      data: defaultData,
     };
-
-    setNodes((nds) => [...nds, newNode]);
+  
+    setNodes(nds => [...nds, newNode]);
   }, []);
 
   // Delete functionality
