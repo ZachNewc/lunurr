@@ -199,34 +199,29 @@ function VariableInput({ value, onChange }: VariableInputProps) {
   );
 }
 
-function StockList({ includeDefault }: {includeDefault: boolean}) {
-  let init = includeDefault ? ["DEFAULT"] : []
-  const [stocks, setStocks] = useState<String[]>(init)
-
-  function addStock(): void {
-    const ticker = prompt("Ticker: ")?.toUpperCase();
-    if (ticker && !stocks.includes(ticker)) {
-      setStocks([...stocks, ticker]);
-    }
-  }
-
-  function removeStock(stock: String) {
-    setStocks((prevStocks) => prevStocks.filter((s) => s !== stock));
-  }
-
+interface StockListProps {
+  value: string[];
+  onChange: (value: string[]) => void;
+}
+function StockList({ value, onChange }: StockListProps) {
   return (
     <>
-      {stocks.map((stock)=> {return (
+      {value.map((stock)=> {return (
         <div
           className={styles.variableInput}
           contentEditable={false}
-          onClick={() => removeStock(stock)}
+          onClick={() => onChange(value.filter((s) => s !== stock))}
           style={{cursor: "default"}}
         >
           {stock}
         </div>
       )})}
-      <button className='nodrag' onClick={addStock}>＋</button>
+      <button className='nodrag' onClick={() => {
+          let addedTicker = prompt("Enter a ticker:") || "DEFAULT"
+          if (addedTicker && !value.includes(addedTicker.toUpperCase())) {
+            onChange([...value, addedTicker.toUpperCase()])
+          }
+        }}>＋</button>
     </>
   );
 }
@@ -309,11 +304,17 @@ function EventNode({ id, data }: { id: string, data: any }) {
     ));
   }
 
+  const handleStockListChange = (value : string[]) => {
+    setNodes(nds => nds.map(node => 
+      node.id === id ? { ...node, data: { ...data, stocks: value } } : node
+    ));
+  }
+
   return (
     <>
       <div className={styles.horizontalAlign}>
         <p className={styles.nodeTitle}>Event for </p>
-        <StockList includeDefault={false}/>
+        <StockList value={data.stocks || []} onChange={handleStockListChange}/>
       </div>
       <hr />
       <div className={styles.horizontalAlign}>
@@ -336,6 +337,12 @@ function BuyNode({ id, data }: { id: string, data: any }) {
     ));
   };
 
+  const handleStockListChange = (value : string[]) => {
+    setNodes(nds => nds.map(node => 
+      node.id === id ? { ...node, data: { ...data, stocks: value } } : node
+    ));
+  }
+
   return (
     <>
       <Handle type="target" position={Position.Top} />
@@ -344,7 +351,7 @@ function BuyNode({ id, data }: { id: string, data: any }) {
       <div className={styles.horizontalAlign}>
         <VariableInput value={data.left || ''} onChange={handleLeftChange} />
         <p className={styles.nodeText}>share(s) of</p>
-        <StockList includeDefault={true} />
+        <StockList value={data.stocks || []} onChange={handleStockListChange}/>
       </div>
     </>
   )
@@ -359,6 +366,12 @@ function SellNode({ id, data }: { id: string, data: any }) {
     ));
   };
 
+  const handleStockListChange = (value : string[]) => {
+    setNodes(nds => nds.map(node => 
+      node.id === id ? { ...node, data: { ...data, stocks: value } } : node
+    ));
+  }
+
   return (
     <>
       <Handle type="target" position={Position.Top} />
@@ -367,7 +380,7 @@ function SellNode({ id, data }: { id: string, data: any }) {
       <div className={styles.horizontalAlign}>
         <VariableInput value={data.left || ''} onChange={handleLeftChange} />
         <p>share(s) of</p>
-        <StockList includeDefault={true} />
+        <StockList value={data.stocks || []} onChange={handleStockListChange}/>
       </div>
     </>
   )
