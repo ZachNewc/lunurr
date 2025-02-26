@@ -3,20 +3,21 @@ import React, { useState, useRef, useCallback, useEffect } from 'react';
 
 import styles from '../styles/Editor.module.css'
 
-
-function Comparison() {
-  type ComparisonOperation = '=' | '<' | '>' | '<=' | '>=' | '≠';
-
-  const [selectedOperation, setSelectedOperation] = useState<ComparisonOperation>('=');
+interface ComparisonProps {
+  value: string;
+  onChange: (value: string) => void;
+}
+function Comparison({value, onChange}: ComparisonProps) {
+  type ComparisonOperation = '=' | '<' | '>' | '<=' | '>=' | 'not =';
 
   const handleChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    setSelectedOperation(event.target.value as ComparisonOperation);
+    onChange(event.target.value as ComparisonOperation);
   };
 
   return (
     <select
       id="comparison-select"
-      value={selectedOperation}
+      value={value}
       onChange={handleChange}
     >
       <option value="=">=</option>
@@ -24,7 +25,7 @@ function Comparison() {
       <option value=">">&gt;</option>
       <option value="<=">&lt;=</option>
       <option value=">=">&gt;=</option>
-      <option value="≠">≠</option>
+      <option value="not =">not =</option>
     </select>
   );
 }
@@ -33,7 +34,6 @@ interface VariableInputProps {
   value: string;
   onChange: (value: string) => void;
 }
-
 function VariableInput({ value, onChange }: VariableInputProps) {
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -231,12 +231,21 @@ function StockList({ includeDefault }: {includeDefault: boolean}) {
   );
 }
 
-function LabelNode() {
+function LabelNode({ id, data }: { id: string, data: any }) {
+  const { setNodes } = useReactFlow();
+
+  const handleLabelChange = (value: string) => {
+    console.log(1)
+    setNodes(nds => nds.map(node => 
+      node.id === id ? { ...node, data: { ...data, left: value } } : node
+    ));
+  };
+
   return (
     <>
       <Handle type="target" position={Position.Top} />
       <div>
-        <textarea name="label" id="label" className='nodrag'></textarea>
+        <textarea name="label" id="label" className='nodrag' value={data.left || ''} onInput={(event: React.FormEvent<HTMLTextAreaElement>) => {handleLabelChange(event.currentTarget.value)}}></textarea>
       </div>
       <Handle type="source" position={Position.Bottom} />
     </>
@@ -258,6 +267,12 @@ function IfNode({ id, data }: { id: string, data: any }) {
     ));
   };
 
+  const handleComparisonChange = (value: string) => {
+    setNodes(nds => nds.map(node => 
+      node.id === id ? { ...node, data: { ...data, comparison: value } } : node
+    ));
+  }
+
   return (
     <>
       <Handle type="target" position={Position.Top} />
@@ -265,7 +280,7 @@ function IfNode({ id, data }: { id: string, data: any }) {
       <hr />
       <div className={styles.horizontalAlign}>
         <VariableInput value={data.left || ''} onChange={handleLeftChange} />
-        <Comparison />
+        <Comparison value={data.comparison || ''} onChange={handleComparisonChange} />
         <VariableInput value={data.right || ''} onChange={handleRightChange} />
       </div>
       <Handle type="source" position={Position.Bottom} />
@@ -273,7 +288,26 @@ function IfNode({ id, data }: { id: string, data: any }) {
   );
 }
 
-function EventNode() {
+function EventNode({ id, data }: { id: string, data: any }) {
+  const { setNodes } = useReactFlow();
+
+  const handleLeftChange = (value: string) => {
+    setNodes(nds => nds.map(node => 
+      node.id === id ? { ...node, data: { ...data, left: value } } : node
+    ));
+  };
+
+  const handleRightChange = (value: string) => {
+    setNodes(nds => nds.map(node => 
+      node.id === id ? { ...node, data: { ...data, right: value } } : node
+    ));
+  };
+
+  const handleComparisonChange = (value: string) => {
+    setNodes(nds => nds.map(node => 
+      node.id === id ? { ...node, data: { ...data, comparison: value } } : node
+    ));
+  }
 
   return (
     <>
@@ -284,23 +318,31 @@ function EventNode() {
       <hr />
       <div className={styles.horizontalAlign}>
         <p className={styles.nodeText}>Trigger when</p>
-        <VariableInput />
-        <Comparison />
-        <VariableInput />
+        <VariableInput value={data.left || ''} onChange={handleLeftChange} />
+        <Comparison value={data.comparison || ''} onChange={handleComparisonChange} />
+        <VariableInput value={data.right || ''} onChange={handleRightChange} />
       </div>
       <Handle type="source" position={Position.Bottom} />
     </>
   )
 }
 
-function BuyNode() {
+function BuyNode({ id, data }: { id: string, data: any }) {
+  const { setNodes } = useReactFlow();
+
+  const handleLeftChange = (value: string) => {
+    setNodes(nds => nds.map(node => 
+      node.id === id ? { ...node, data: { ...data, left: value } } : node
+    ));
+  };
+
   return (
     <>
       <Handle type="target" position={Position.Top} />
       <p className={styles.nodeTitle}>Buy </p>
       <hr />
       <div className={styles.horizontalAlign}>
-        <VariableInput />
+        <VariableInput value={data.left || ''} onChange={handleLeftChange} />
         <p className={styles.nodeText}>share(s) of</p>
         <StockList includeDefault={true} />
       </div>
@@ -308,14 +350,22 @@ function BuyNode() {
   )
 }
 
-function SellNode() {
+function SellNode({ id, data }: { id: string, data: any }) {
+  const { setNodes } = useReactFlow();
+
+  const handleLeftChange = (value: string) => {
+    setNodes(nds => nds.map(node => 
+      node.id === id ? { ...node, data: { ...data, left: value } } : node
+    ));
+  };
+
   return (
     <>
       <Handle type="target" position={Position.Top} />
       <p className={styles.nodeTitle}>Sell </p>
       <hr />
       <div className={styles.horizontalAlign}>
-        <VariableInput />
+        <VariableInput value={data.left || ''} onChange={handleLeftChange} />
         <p>share(s) of</p>
         <StockList includeDefault={true} />
       </div>

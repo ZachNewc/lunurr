@@ -109,8 +109,10 @@ const Editor: React.FC = () => {
 
     const defaultData = {
       ...(type === 'if' && { left: '', right: '', comparison: '=' }),
-      ...(type === 'event' && { condition: '' }),
-      ...(type === 'buy' && { shares: '', stocks: ['DEFAULT'] }),
+      ...(type === 'label' && { left: '' }),
+      ...(type === 'if' && { left: '', right: '', comparison: '=' , stocks: ['DEFAULT'] }),
+      ...(type === 'buy' && { left: '', stocks: ['DEFAULT'] }),
+      ...(type === 'sell' && { left: '', stocks: ['DEFAULT'] }),
     };
   
     const newNode: Node = {
