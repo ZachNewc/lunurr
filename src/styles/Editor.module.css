@@ -161,7 +161,7 @@ button:active {
     margin-top: var(--space-xxs);
     max-height: 200px;
     overflow-y: auto;
-    z-index: 1000;
+    z-index: 10000000;
     position: absolute;
 }
   
